@@ -7,6 +7,14 @@ description: 将一次实际观察到的浏览器、桌面操作或 AI 办事过
 
 把一次具体操作保存为可重用的工作流。回放由当前 agent 调用可用的浏览器、桌面或其他任务工具完成，按实际结果验证每一步。
 
+## 在不同 Agent 中使用
+
+本入口使用通用 Agent Skills 格式，供 Codex、Claude Code、Hermes Agent、Cherry Studio、CodeBuddy 及能加载同类技能的 Agent 使用。安装、调用和能力差异见 [Agent 适配说明](references/agent-compatibility.md)；只读取当前平台相关部分。
+
+用宿主提供的技能目录定位配套文件，再使用实际可用的 Python 3.10+ 解释器运行 helper。不要依赖启动目录，也不要把 `$record-and-replay` 当作所有平台共有的命令。`agents/openai.yaml` 仅是 Codex 的可选界面元数据，工作流不依赖它。
+
+跨 Agent 交接时，携带同一份 `workflow.json`、必要的脱敏证据和运行日志。重新发现当前工具并核验工作目录、路径可达性、账号和前后条件。把步骤的语义动作映射到当前工具的真实参数；不要照抄其他 Agent 的工具调用、临时定位符或进程状态。仅更换 Agent 不修改执行定义；若输入路径、账号或执行步骤需要改变，按 Resume 规则创建新日志。证据不可读取时保留核验缺口，不假定上次成功。
+
 ## 选择模式与能力
 
 - **Record**：用户演示，导入真实录制轨迹，或记录 agent 在当前任务中实际执行的操作。
@@ -72,7 +80,9 @@ chosen-recording-directory/
 
 ## 常见调用
 
-- `$record-and-replay 记录这次操作：打开报表页面，选择月份，导出文件。`
-- `$record-and-replay 回放这个 workflow.json，把 period 换成 2026-10。`
-- `$record-and-replay 从这个 runs/run.json 恢复，先查上次导出有没有完成。`
-- `$record-and-replay 根据我给的步骤生成草稿，只输出回放计划。`
+在当前平台选择或加载 `record-and-replay` 后，用自然语言给出任务：
+
+- `记录这次操作：打开报表页面，选择月份，导出文件。`
+- `回放这个 workflow.json，把 period 换成 2026-10。`
+- `从这个 runs/run.json 恢复，先查上次导出有没有完成。`
+- `根据我给的步骤生成草稿，只输出回放计划。`
