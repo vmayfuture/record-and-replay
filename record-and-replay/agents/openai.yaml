@@ -1,0 +1,4 @@
+interface:
+  display_name: "Record and Replay"
+  short_description: "将一次实际操作保存为可参数化流程，重新定位目标、回放并核验结果"
+  default_prompt: "使用 $record-and-replay 记录这次操作，保存可替换参数的工作流，并说明回放验证结果。"

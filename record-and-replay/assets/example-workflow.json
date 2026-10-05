@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "name": "export-monthly-report",
+  "goal": "导出指定月份的报表，并将实际下载文件保存到指定位置。示例站点仅为占位符，使用前替换成真实目标并记录观察。",
+  "context": {
+    "application": "browser",
+    "origin": "https://example.test",
+    "account": "回放前核验的实际报表账号",
+    "start_conditions": "目标浏览器可操作；用户已登录；具备读取和导出报表的权限。"
+  },
+  "parameters": {
+    "period": {"type": "string", "required": true, "secret": false},
+    "output_file": {"type": "string", "required": true, "secret": false}
+  },
+  "recording": {"source": "user-description", "status": "draft"},
+  "steps": [
+    {
+      "id": "open-reports",
+      "intent": "进入报表页",
+      "operation": "open",
+      "target": {"description": "当前授权浏览器中的报表页面", "url": "https://example.test/reports"},
+      "precondition": "目标域名和登录账号与当前任务一致。",
+      "postcondition": "报表页面可见，月份输入控件可用。",
+      "effect": "none",
+      "retry": "safe"
+    },
+    {
+      "id": "fill-period",
+      "intent": "设置报表月份",
+      "operation": "fill",
+      "target": {"description": "报表筛选区的月份输入框", "role": "textbox", "name": "月份", "within": "报表筛选区"},
+      "value": "{{period}}",
+      "precondition": "当前报表页和账号正确，唯一的月份输入框可编辑。",
+      "postcondition": "月份输入框的实际值等于 {{period}}。",
+      "effect": "local_write",
+      "retry": "safe"
+    },
+    {
+      "id": "export-report",
+      "intent": "下载选定月份的报表",
+      "operation": "click",
+      "target": {"description": "报表筛选区的导出按钮", "role": "button", "name": "导出", "within": "报表筛选区"},
+      "precondition": "筛选月份确为 {{period}}；已确认本次是否需要新增下载，避免重复导出。",
+      "postcondition": "实际下载文件存在、非空，文件内容对应 {{period}}；记录本次文件的身份和路径。",
+      "effect": "local_write",
+      "retry": "check-first"
+    },
+    {
+      "id": "save-report",
+      "intent": "把已验证的下载文件保存到用户指定的位置",
+      "operation": "tool",
+      "target": {"description": "本次已验证的实际下载文件和目的路径 {{output_file}}", "tool": "当前环境可用的本地文件复制工具"},
+      "value": "{{output_file}}",
+      "precondition": "已确定本次下载文件的实际路径；目的路径在用户指定范围内；同名现有文件不被意外覆盖。",
+      "postcondition": "{{output_file}} 存在，其内容与本次已验证的下载文件一致。",
+      "effect": "local_write",
+      "retry": "check-first"
+    }
+  ],
+  "verification": {"status": "not-run"}
+}
